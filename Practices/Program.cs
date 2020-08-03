@@ -14,6 +14,10 @@ namespace Practices
 		static void Main(string[] args)
 		{
 			Console.WriteLine("Hello World!");
+			string[] arr = { "dog", "racecar", "car" };
+			string[] arrError = { "aa","aa"};
+			LongestCommonPrefix(arrError);
+			RomanToInt("IV");
 			RemoveOuterParentheses("(()())(())");
 			int[][] points = new int[3][];
 			points[0] = new int[2] { 1, 1 };
@@ -437,13 +441,14 @@ namespace Practices
 			}
 			return sb.ToString();
 		}
-
-		public int RomanToInt(string s)
+		// why Dictionary.ContainsKey does not work?
+		// may need rewrite GetHashCode() and Equal()?
+		public static int RomanToInt(string s)
 		{
 			int result = 0;
 			foreach (var item in s)
 			{
-				result += (item switch
+				int v = item switch
 				{
 					'I' => 1,
 					'V' => 5,
@@ -453,12 +458,84 @@ namespace Practices
 					'D' => 500,
 					'M' => 1000,
 					_ => throw new NotImplementedException()
-				});
+				};
+				result += v;
 			}
-			if (s.Contains("IV"))
+			Dictionary<char[], int> dict = new Dictionary<char[], int>();
+			char[] pair = new char[2];
+			for (int i = 0; i < s.Length; i += 2)
 			{
-				result--;
+				pair[0] = s[i];
+				if (i + 1 == s.Length)
+					pair[1] = ' ';
+				else
+					pair[1] = s[i + 1];
+				if (dict.ContainsKey(pair))
+					dict[pair]++;
+				else
+					dict.Add(pair, 1);
 			}
+			char[][] less = new char[6][];
+			for (int i = 0; i < 6; i++)
+				less[i] = new char[2];
+			less[0][0] = 'I';
+			less[0][1] = 'V';
+			less[1][0] = 'I';
+			less[1][1] = 'X';
+			less[2][0] = 'X';
+			less[2][1] = 'L';
+			less[3][0] = 'X';
+			less[3][1] = 'C';
+			less[4][0] = 'C';
+			less[4][1] = 'D';
+			less[5][0] = 'C';
+			less[5][1] = 'M';
+			int[] reduce = new int[6] { 2, 2, 10, 10, 100, 100 };
+			foreach (var item in less)
+				if (dict.ContainsKey(item))
+					result -= reduce[Array.IndexOf(less, item)];
+			return result;
+		}
+		// it is common prefix no common substring...
+		//
+		public static string LongestCommonPrefix(string[] strs)
+		{
+			string result = string.Empty;
+			int minLen = strs[0].Length;
+			string minStr = strs[0];
+			foreach (var item in strs)
+				if (item.Length < minLen)
+				{
+					minLen = item.Length;
+					minStr = item;
+				}
+			int mid = minLen, low = 0;
+			string sub = string.Empty;
+			while (mid > low)
+			{
+				mid = (low + mid) / 2;
+				sub = minStr.Substring(low, (mid - low) == 0 ? 1 : (mid - low));
+				bool isSub = true;
+
+				for (int i = 0; i < strs.Length; i++)
+				{
+					for (int j = 0, h = low; j < sub.Length && (h < mid || h < low+1); j++, h++)
+						if (sub[j] != strs[i][h])
+						{
+							isSub = false;
+							break;
+						}
+					if (!isSub)
+						break;
+				}
+				if (isSub && ((mid != low) || minLen == 1))
+				{
+					low = mid;
+					mid += mid - low;
+					result += sub;
+				}
+			}
+
 			return result;
 		}
 	}
