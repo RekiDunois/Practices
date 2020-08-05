@@ -15,8 +15,9 @@ namespace Practices
 		{
 			Console.WriteLine("Hello World!");
 			string[] arr = { "dog", "racecar", "car" };
-			string[] arrError = { "aa","aa"};
-			LongestCommonPrefix(arrError);
+			string[] arrError = { "aa", "aa" };
+			string[] arrRight = { "flower", "flow", "flight" };
+			LongestCommonPrefix(arrRight);
 			RomanToInt("IV");
 			RemoveOuterParentheses("(()())(())");
 			int[][] points = new int[3][];
@@ -500,6 +501,8 @@ namespace Practices
 		//
 		public static string LongestCommonPrefix(string[] strs)
 		{
+			if (strs.Length == 0)
+				return string.Empty;
 			string result = string.Empty;
 			int minLen = strs[0].Length;
 			string minStr = strs[0];
@@ -511,15 +514,18 @@ namespace Practices
 				}
 			int mid = minLen, low = 0;
 			string sub = string.Empty;
-			while (mid > low)
+			mid = (low + mid) / 2;
+			if (mid == low)
+				mid = 1;
+			while (mid > low && low < minLen && mid != minLen)
 			{
-				mid = (low + mid) / 2;
+
 				sub = minStr.Substring(low, (mid - low) == 0 ? 1 : (mid - low));
 				bool isSub = true;
 
 				for (int i = 0; i < strs.Length; i++)
 				{
-					for (int j = 0, h = low; j < sub.Length && (h < mid || h < low+1); j++, h++)
+					for (int j = 0, h = low; j < sub.Length && (h < mid || h < low + 1); j++, h++)
 						if (sub[j] != strs[i][h])
 						{
 							isSub = false;
@@ -528,14 +534,19 @@ namespace Practices
 					if (!isSub)
 						break;
 				}
-				if (isSub && ((mid != low) || minLen == 1))
+				if (isSub && ((mid >= low) || minLen == mid + low || minLen == 1))
 				{
+					int oldLow = low;
 					low = mid;
-					mid += mid - low;
+					mid += mid - oldLow;
 					result += sub;
 				}
-			}
+				else if (!isSub)
+				{
+					mid /= 2;
+				}
 
+			}
 			return result;
 		}
 	}
