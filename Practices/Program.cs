@@ -6,6 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Practices
 {
@@ -14,25 +16,11 @@ namespace Practices
 		static void Main(string[] args)
 		{
 			Console.WriteLine("Hello World!");
-			string[] arr = { "dog", "racecar", "car" };
-			string[] arrError = { "aa", "aa" };
-			string[] arrRight = { "flower", "flow", "flight" };
-			LongestCommonPrefix(arrRight);
-			RomanToInt("IV");
-			RemoveOuterParentheses("(()())(())");
-			int[][] points = new int[3][];
-			points[0] = new int[2] { 1, 1 };
-			points[1] = new int[2] { 3, 4 };
-			points[2] = new int[2] { -1, 0 };
-			MinTimeToVisitAllPoints(points);
-			Console.WriteLine(BalancedStringSplit("RLRRLLRLRL"));
-			ListNode thrid = new ListNode(1);
-			ListNode second = new ListNode(0, thrid);
-			ListNode first = new ListNode(1, second);
-			GetDecimalValue(first);
+			Maximum69Number(9669);
+			Console.WriteLine(FreqAlphabets("12345678910#11#12#13#14#15#16#17#18#19#20#21#22#23#24#25#26#"));
 		}
 
-		public static int[] RunningSum(int[] nums)
+		public int[] RunningSum(int[] nums)
 		{
 			int[] result = new int[nums.Length];
 			Parallel.For(0, nums.Length, (i) =>
@@ -515,12 +503,12 @@ namespace Practices
 			int mid = minLen, low = 0;
 			string sub = string.Empty;
 			mid = (low + mid) / 2;
-			if (mid == low)
+			if (minLen < 4)
 				mid = 1;
-			while (mid > low && low < minLen && mid != minLen)
+			int curNodeLen = mid;
+			while (low < minLen)
 			{
-
-				sub = minStr.Substring(low, (mid - low) == 0 ? 1 : (mid - low));
+				sub = minStr.Substring(low, mid);
 				bool isSub = true;
 
 				for (int i = 0; i < strs.Length; i++)
@@ -534,20 +522,202 @@ namespace Practices
 					if (!isSub)
 						break;
 				}
-				if (isSub && ((mid >= low) || minLen == mid + low || minLen == 1))
+
+				if (isSub && mid != 1)
 				{
-					int oldLow = low;
-					low = mid;
-					mid += mid - oldLow;
+					//int oldMid = mid;
+					low = low + mid;
+					mid = mid / 2;
+					curNodeLen = mid;
+					result += sub;
+
+				}
+				else if (isSub && mid == 1 && minLen == 1)
+				{
+					return result += sub;
+				}
+				else if (isSub && mid == 1 && curNodeLen == 1)
+				{
+					low++;
+					curNodeLen = mid;
 					result += sub;
 				}
-				else if (!isSub)
+
+				if (!isSub)
 				{
 					mid /= 2;
+					if (mid == 0)
+						return result;
 				}
-
 			}
 			return result;
+		}
+
+		public static bool IsValid(string s)
+		{
+			if (s.Length == 1 || s.Length % 2 != 0)
+				return false;
+			bool result = true;
+			Stack<char> stack = new Stack<char>();
+			char[] left = new char[3] { '[', '(', '{' };
+			StringBuilder sb = new StringBuilder();
+			foreach (var item in s)
+			{
+				if (left.Contains(item))
+				{
+					stack.Push(item);
+					result = false;
+				}
+				else if (stack.Count > 0)
+				{
+					sb.Clear();
+					sb.Append(stack.Pop());
+					sb.Append(item);
+					if (!isPair(sb.ToString()))
+						return false;
+					else
+						result = true;
+				}
+			}
+			return result && stack.Count == 0;
+		}
+
+		public static bool isPair(string pair)
+		{
+			Dictionary<string, int> goodPair = new Dictionary<string, int> { { "[]", 1 }, { "()", 1 }, { "{}", 1 } };
+			return goodPair.ContainsKey(pair);
+		}
+		// Count() is much more faster than Length
+		public int BusyStudent(int[] startTime, int[] endTime, int queryTime)
+		{
+			int result = 0;
+			for (int i = 0; i < endTime.Length; i++)
+			{
+				if (queryTime >= startTime[i] && queryTime <= endTime[i])
+					result++;
+			}
+			return result;
+		}
+
+		public int MaxProduct(int[] nums)
+		{
+			if (nums.Count() == 2)
+				return (nums[0] - 1) * (nums[1] - 1);
+			Dictionary<int, int> dict = new Dictionary<int, int>();
+			foreach (var item in nums)
+			{
+				if (dict.ContainsKey(item))
+					dict[item]++;
+				else
+					dict.Add(item, 1);
+			}
+			if (dict[nums.Max()] > 1)
+				return (nums.Max() - 1) * (nums.Max() - 1);
+			else
+			{
+				int max = nums.Max();
+				nums[Array.IndexOf(nums, max)] = -1;
+				return (nums.Max() - 1) * (max - 1);
+			}
+		}
+
+		public static int Maximum69Number(int num)
+		{
+			char[] numC = num.ToString().ToArray();
+			int[] nums = new int[numC.Count() + 1];
+			nums[0] = num;
+			for (int i = 0; i < numC.Count(); i++)
+			{
+				char[] temp = new char[4];
+				numC.CopyTo(temp, 0);
+				if (numC[i] == '6')
+					temp[i] = '9';
+				else
+					temp[i] = '6';
+				nums[i + 1] = int.Parse(temp);
+			}
+			Array.Sort(nums);
+			return nums[nums.Count() - 1];
+		}
+		// you could use HashSet
+		public string DestCity(IList<IList<string>> paths)
+		{
+			Dictionary<string, IList<string>> dict = new Dictionary<string, IList<string>>();
+			foreach (var item in paths)
+			{
+				if (dict.ContainsKey(item[0]))
+				{
+					dict[item[0]].Append(item[1]);
+				}
+				else
+				{
+					IList<string> temp = new List<string>();
+					temp.Append(item[1]);
+					dict.Add(item[0], temp);
+				}
+			}
+			foreach (var item in paths)
+			{
+				if (!dict.ContainsKey(item[1]))
+				{
+					return item[1];
+				}
+			}
+			return string.Empty;
+		}
+
+		public static int UniqueMorseRepresentations(string[] words)
+		{
+			Dictionary<char, string> dict = new Dictionary<char, string>() { { 'a', ".-" }, { 'b', "-..." }, { 'c', "-.-." }, { 'd', "-.." }, { 'e', "." }, { 'f', "..-." }, { 'g', "--." }, { 'h', "...." }, { 'i', ".." }, { 'j', ".---" }, { 'k', "-.-" }, { 'l', ".-.." }, { 'm', "--" }, { 'n', "-." }, { 'o', "---" }, { 'p', ".--." }, { 'q', "--.-" }, { 'r', ".-." }, { 's', "..." }, { 't', "-" }, { 'u', "..-" }, { 'v', "...-" }, { 'w', ".--" }, { 'x', "-..-" }, { 'y', "-.--" }, { 'z', "--.." } };
+			List<string> morses = new List<string>();
+			for (int i = 0; i < words.Count(); i++)
+			{
+				morses.Add("");
+				foreach (var item in words[i])
+				{
+					morses[i] += dict[item];
+				}
+			}
+			var result = morses.Distinct();
+			return result.Count();
+		}
+
+		public static string FreqAlphabets(string s)
+		{
+			Dictionary<string, char> dict = new Dictionary<string, char>() { { "1", 'a' }, { "2", 'b' }, { "3", 'c' }, { "4", 'd' }, { "5", 'e' }, { "6", 'f' }, { "7", 'g' }, { "8", 'h' }, { "9", 'i' }, { "10#", 'j' }, { "11#", 'k' }, { "12#", 'l' }, { "13#", 'm' }, { "14#", 'n' }, { "15#", 'o' }, { "16#", 'p' }, { "17#", 'q' }, { "18#", 'r' }, { "19#", 's' }, { "20#", 't' }, { "21#", 'u' }, { "22#", 'v' }, { "23#", 'w' }, { "24#", 'x' }, { "25#", 'y' }, { "26#", 'z' } };
+			string result = string.Empty;
+			List<string> arr = new List<string>();
+			if (s.Length < 3)
+			{
+				foreach (var item in s)
+				{
+					string ss = string.Empty;
+					ss += item;
+					result += dict[ss];
+				}
+				return result;
+			}
+			
+			for (int i = 0; i < s.Count(); i++)
+			{
+				string temp = "";
+				if (i + 2 < s.Count() && s[i + 2] == '#') 
+				{
+					temp += s[i];
+					temp += s[i + 1];
+					temp += s[i + 2];
+					i+=2;
+				}
+				else
+					temp += s[i];
+				arr.Add(temp);
+			}
+			foreach (var item in arr)
+			{
+				result += dict[item];
+			}
+			return result;
+
 		}
 	}
 }
