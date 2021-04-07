@@ -2,12 +2,8 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Text;
-using System.IO;
-using System.Runtime.CompilerServices;
 
 namespace Practices
 {
@@ -16,8 +12,16 @@ namespace Practices
 		static void Main(string[] args)
 		{
 			Console.WriteLine("Hello World!");
-			Maximum69Number(9669);
-			Console.WriteLine(FreqAlphabets("12345678910#11#12#13#14#15#16#17#18#19#20#21#22#23#24#25#26#"));
+			var sample = new TestModel() { Count = 1, Money = 1.12121M, Name = "1", Date = DateTime.Now, IsSuccess = true };
+			var s = typeof(TestModel).GetProperties();
+			var enumerableFiled = new List<string>();
+			foreach (var item in s)
+			{
+				enumerableFiled.Add(item.Name);
+			}
+			List<TestModel> target = Enumerable.Repeat(sample, 100).ToList();
+			var result = LCGUsage.OldFieldPrinter.GetFieldContent<TestModel>(target, enumerableFiled.ToArray());
+			Console.WriteLine(result);
 		}
 
 		public int[] RunningSum(int[] nums)
@@ -719,5 +723,6 @@ namespace Practices
 			return result;
 
 		}
+
 	}
 }
